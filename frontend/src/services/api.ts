@@ -63,7 +63,7 @@ export const goalsAPI = {
 // Progress API
 export const progressAPI = {
   getByGoal: (goalId: string, params?: { startDate?: string; endDate?: string }) =>
-    api.get(`/progress/goal/${goalId}`, { params }),
+    api.get('/progress', { params: { goalId, ...params } }),
   create: (data: any) =>
     api.post('/progress', data),
   update: (id: string, data: any) =>

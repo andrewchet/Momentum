@@ -82,7 +82,10 @@ const GoalCard: React.FC<GoalCardProps> = ({ goal, onEdit, onDelete }) => {
 
       <div className="flex gap-2">
         <button
-          onClick={() => navigate(`/goals/${goal.id}/progress`)}
+          onClick={() => {
+            console.log('Navigating to goal:', goal.id);
+            navigate(`/goals/${goal.id}/progress`);
+          }}
           className="flex-1 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium py-2 px-4 rounded-md transition duration-200"
         >
           View Progress

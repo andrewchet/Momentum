@@ -182,8 +182,11 @@ const Dashboard: React.FC = () => {
             <div className="space-y-4">
               {stats.recentProgress.slice(0, 5).map((entry: any, index: number) => (
                 <div key={index} className="flex items-center justify-between border-b pb-3">
-                  <div>
+                  <div className="flex-1">
                     <p className="text-sm font-medium text-gray-900">
+                      {entry.goalTitle || 'Goal'}
+                    </p>
+                    <p className="text-sm text-gray-700">
                       {entry.value} {entry.unit || ''}
                     </p>
                     <p className="text-xs text-gray-500">

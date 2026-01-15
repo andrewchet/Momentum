@@ -20,6 +20,7 @@ const GoalList: React.FC = () => {
       if (statusFilter) params.status = statusFilter;
       
       const response = await goalsAPI.getAll(params);
+      console.log('Goals API response:', response.data);
       setGoals(response.data.goals || []);
     } catch (error) {
       console.error('Failed to fetch goals:', error);

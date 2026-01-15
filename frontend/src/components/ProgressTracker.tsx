@@ -22,10 +22,13 @@ const ProgressTracker: React.FC = () => {
         goalsAPI.getById(goalId),
         progressAPI.getByGoal(goalId),
       ]);
+      console.log('Goal Response:', goalRes);
+      console.log('Progress Response:', progressRes);
       setGoal(goalRes.data.goal);
       setProgressEntries(progressRes.data.progress || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch data:', error);
+      console.error('Error details:', error.response?.data || error.message);
     } finally {
       setLoading(false);
     }

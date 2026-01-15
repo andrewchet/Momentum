@@ -59,11 +59,11 @@ router.get(
       const result = await pool.query(query, params);
 
       res.json({
-        entries: result.rows.map(entry => ({
+        progress: result.rows.map(entry => ({
           id: entry.id,
           goalId: entry.goal_id,
-          entryDate: entry.entry_date,
-          value: entry.value,
+          date: entry.entry_date,
+          value: parseFloat(entry.value),
           unit: entry.unit,
           notes: entry.notes,
           createdAt: entry.created_at,
@@ -104,8 +104,8 @@ router.get('/:id', param('id').isUUID(), validate, async (req, res) => {
       entry: {
         id: entry.id,
         goalId: entry.goal_id,
-        entryDate: entry.entry_date,
-        value: entry.value,
+        date: entry.entry_date,
+        value: parseFloat(entry.value),
         unit: entry.unit,
         notes: entry.notes,
         createdAt: entry.created_at,
@@ -127,14 +127,14 @@ router.post(
   '/',
   [
     body('goalId').isUUID().withMessage('Valid goal ID is required'),
-    body('entryDate').isISO8601().withMessage('Valid entry date is required'),
+    body('date').isISO8601().withMessage('Valid entry date is required'),
     body('value').isNumeric().withMessage('Value must be a number'),
     body('unit').optional().trim(),
     body('notes').optional().trim()
   ],
   validate,
   async (req, res) => {
-    const { goalId, entryDate, value, unit, notes } = req.body;
+    const { goalId, date, value, unit, notes } = req.body;
     const userId = req.user.userId;
 
     try {
@@ -151,7 +151,7 @@ router.post(
       // Check for duplicate entry on same date
       const duplicateCheck = await pool.query(
         'SELECT id FROM progress_entries WHERE goal_id = $1 AND entry_date = $2',
-        [goalId, entryDate]
+        [goalId, date]
       );
 
       if (duplicateCheck.rows.length > 0) {
@@ -165,7 +165,7 @@ router.post(
         `INSERT INTO progress_entries (goal_id, entry_date, value, unit, notes)
          VALUES ($1, $2, $3, $4, $5)
          RETURNING *`,
-        [goalId, entryDate, value, unit || null, notes || null]
+        [goalId, date, value, unit || null, notes || null]
       );
 
       const entry = result.rows[0];
@@ -175,8 +175,8 @@ router.post(
         entry: {
           id: entry.id,
           goalId: entry.goal_id,
-          entryDate: entry.entry_date,
-          value: entry.value,
+          date: entry.entry_date,
+          value: parseFloat(entry.value),
           unit: entry.unit,
           notes: entry.notes,
           createdAt: entry.created_at,
@@ -255,8 +255,8 @@ router.put(
         entry: {
           id: entry.id,
           goalId: entry.goal_id,
-          entryDate: entry.entry_date,
-          value: entry.value,
+          date: entry.entry_date,
+          value: parseFloat(entry.value),
           unit: entry.unit,
           notes: entry.notes,
           createdAt: entry.created_at,

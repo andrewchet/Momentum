@@ -51,23 +51,44 @@ router.get('/dashboard', async (req, res) => {
       [userId]
     );
 
+    // Get recent progress entries with goal details (last 7 days, limit 5)
+    const recentProgressEntries = await pool.query(
+      `SELECT 
+        pe.id,
+        pe.entry_date as date,
+        pe.value,
+        pe.unit,
+        pe.notes,
+        g.title as goal_title,
+        g.category
+       FROM progress_entries pe
+       JOIN goals g ON pe.goal_id = g.id
+       WHERE g.user_id = $1
+       ORDER BY pe.entry_date DESC, pe.created_at DESC
+       LIMIT 5`,
+      [userId]
+    );
+
     res.json({
-      dashboard: {
-        goals: {
-          total: parseInt(goalsStats.rows[0].total_goals),
-          active: parseInt(goalsStats.rows[0].active_goals),
-          completed: parseInt(goalsStats.rows[0].completed_goals),
-          byCategory: {
-            fitness: parseInt(goalsStats.rows[0].fitness_goals),
-            nutrition: parseInt(goalsStats.rows[0].nutrition_goals),
-            jobSearch: parseInt(goalsStats.rows[0].job_search_goals)
-          }
-        },
-        progressEntries: {
-          total: parseInt(totalProgress.rows[0].total_entries),
-          lastSevenDays: parseInt(recentProgress.rows[0].recent_entries)
-        }
-      }
+      totalGoals: parseInt(goalsStats.rows[0].total_goals),
+      activeGoals: parseInt(goalsStats.rows[0].active_goals),
+      completedGoals: parseInt(goalsStats.rows[0].completed_goals),
+      totalProgress: parseInt(totalProgress.rows[0].total_entries),
+      recentProgressCount: parseInt(recentProgress.rows[0].recent_entries),
+      recentProgress: recentProgressEntries.rows.map(entry => ({
+        id: entry.id,
+        date: entry.date,
+        value: parseFloat(entry.value),
+        unit: entry.unit,
+        notes: entry.notes,
+        goalTitle: entry.goal_title,
+        category: entry.category
+      })),
+      categoryBreakdown: [
+        { category: 'fitness', count: parseInt(goalsStats.rows[0].fitness_goals) },
+        { category: 'nutrition', count: parseInt(goalsStats.rows[0].nutrition_goals) },
+        { category: 'job_search', count: parseInt(goalsStats.rows[0].job_search_goals) }
+      ]
     });
   } catch (error) {
     console.error('Dashboard analytics error:', error);
